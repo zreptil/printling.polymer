@@ -1,0 +1,44 @@
+﻿F<script src="resources/localcfg.js"></script>
+<script src="resources/globals.js"></script>
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/font-roboto/roboto.html">
+<link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../../bower_components/responsive-table/responsive-table.html">
+<link rel="import" href="printling-signed-out.html">
+<link rel="import" href="printling-signed-in.html">
+<dom-module id="printling-app">
+  <template>
+    <style include="responsive-table-style"></style>
+    <style is="custom-style">
+      printling-signed-in
+      {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
+      }
+    </style>
+    <printling-signed-out id="out"></printling-signed-out>
+    <printling-signed-in id="in" hidden></printling-signed-in>
+  </template>
+  <script>
+    Polymer(
+    {
+      is: "printling-app",
+			statusChange: function(cloudData)
+			{
+				switch(cloudData.googleStatus)
+				{
+					case "signin granted":
+						this.$.out.hidden = true;
+						this.$.in.hidden = false;
+						this.$.in.signinDone(cloudData);
+						break;
+					default:
+						this.$.in.hidden = true;
+						this.$.out.hidden = false;
+						this.$.in.signoutDone(cloudData);
+						break;
+				}
+			}
+    });
+  </script>
+</dom-module>

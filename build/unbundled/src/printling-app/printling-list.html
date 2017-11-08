@@ -1,0 +1,65 @@
+<html><head><link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/responsive-table/responsive-table.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+</head><body><dom-module id="printling-list">
+  <template>
+    <style include="responsive-table-style"></style>
+    <style is="custom-style">
+    .responsive-table
+    {
+      width: inherit;
+    }
+    #formlist
+    {
+      @apply(--layout);
+      @apply(--layout-center-justified);
+    }
+    paper-fab[icon="add"]
+    {
+      position: fixed;
+      right:  1.3em;
+      bottom: 0.5em;
+      z-index: 100;
+      --paper-fab-background: var(--color-accent-back);
+      --paper-fab-iron-icon: 
+      {
+        color: var(--color-accent-font);
+      };
+    }
+    .responsive-table
+    {
+      min-width: 60%;
+    }
+    td[data-title="Beschreibung"]
+    {
+      text-align: left!important;
+    }
+    </style>
+    <responsive-table-style id="rts"></responsive-table-style>
+    <div id="formlist">
+      <paper-fab on-tap="tapAdd" icon="add"></paper-fab>
+      <table class="responsive-table">
+        <thead>
+          <tr><th scope="col">Name</th>
+          <th scope="col">Beschreibung</th>
+          <th scope="col"></th>
+        </tr></thead>
+        <tbody>
+          <template is="dom-repeat" items="{{formlist}}">
+            <tr on-tap="tapFormList">
+              <th scope="row">{{getName(item)}}</th>
+              <td data-title="Beschreibung">{{item.description}}</td>
+              <td data-title="">
+                <paper-icon-button on-tap="tapDelete" icon="delete"></paper-icon-button>
+                <paper-icon-button on-tap="tapEdit" icon="create"></paper-icon-button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </template>
+</dom-module>
+<script>Polymer({is:"printling-list",properties:{formlist:{type:Array,value:[]},editName:{type:String,value:""},editDescription:{type:String,value:""}},ready:function(){this.$.rts.init(this)},msg:function(t,e){_.msg(t,e)},activated:function(){_.title="",_.titleSub="",_.$.btnDrawer.hidden=!1,_.$.btnBack.hidden=!0,_.driveData.requestFileList&&_.driveData.requestFileList(this,"",function(t,e,i){"ok"==e&&(t.formlist=i)},"id,name,fileExtension,description,trashed","properties has {key='createdBy' and value='printling'}")},getName:function(t){return t.name},tapFormList:function(t){_.currentListEntry=t.model.item,_.driveData.requestData(_.currentListEntry.name,"",this,this.formLoaded)},formLoaded:function(self,status,data){try{eval(data.content),pdfMake.createPdf(form).open()}catch(t){alert(t)}},tapDelete:function(t){t.stopImmediatePropagation(),_.currentListEntry=t.model.item,_.confirm("Formular "+this.getName(_.currentListEntry)+" wirklich löschen?",[{action:this.doDelete,title:"Ja"},{title:"Nein"}])},doDelete:function(){},tapEdit:function(t){t.stopImmediatePropagation(),_.currentListEntry=t.model.item,""==_.currentListEntry.name?this.formLoadedEdit(this,"ok",_.currentListEntry):_.driveData.requestData(_.currentListEntry.name,"",this,this.formLoadedEdit)},formLoadedEdit:function(t,e,i){_.$.pageEditor.orgData=i,_.$.pages.selected=1},tapAdd:function(t){t.model={item:{name:"",description:""}},t.model.item.content="var form =\r\n{\r\n  content:\r\n  [\r\n  ]\r\n}",this.tapEdit(t)}});</script></body></html>

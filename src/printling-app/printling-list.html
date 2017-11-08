@@ -1,0 +1,150 @@
+﻿<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/responsive-table/responsive-table.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<dom-module id="printling-list">
+  <template>
+    <style include="responsive-table-style"></style>
+    <style is="custom-style">
+    .responsive-table
+    {
+      width: inherit;
+    }
+    #formlist
+    {
+      @apply(--layout);
+      @apply(--layout-center-justified);
+    }
+    paper-fab[icon="add"]
+    {
+      position: fixed;
+      right:  1.3em;
+      bottom: 0.5em;
+      z-index: 100;
+      --paper-fab-background: var(--color-accent-back);
+      --paper-fab-iron-icon: 
+      {
+        color: var(--color-accent-font);
+      };
+    }
+    .responsive-table
+    {
+      min-width: 60%;
+    }
+    td[data-title="Beschreibung"]
+    {
+      text-align: left!important;
+    }
+    </style>
+    <responsive-table-style id="rts"></responsive-table-style>
+    <div id="formlist">
+      <paper-fab on-tap="tapAdd" icon="add"></paper-fab>
+      <table class="responsive-table">
+        <thead>
+          <th scope="col">Name</th>
+          <th scope="col">Beschreibung</th>
+          <th scope="col"></th>
+        </thead>
+        <tbody>
+          <template is="dom-repeat" items="{{formlist}}">
+            <tr on-tap="tapFormList">
+              <th scope="row">{{getName(item)}}</th>
+              <td data-title="Beschreibung">{{item.description}}</td>
+              <td data-title="">
+                <paper-icon-button on-tap="tapDelete" icon="delete"></paper-icon-button>
+                <paper-icon-button on-tap="tapEdit" icon="create"></paper-icon-button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </template>
+</dom-module>
+<script>
+  Polymer(
+  {
+    is: "printling-list"
+    ,properties:
+    {
+      formlist: {type:Array,value:[]}
+     ,editName: {type:String,value:""}
+     ,editDescription: {type:String,value:""}
+    }
+    ,ready: function()
+    {
+      this.$.rts.init(this);
+    }
+    ,msg: function(text,duration)
+    {
+      _.msg(text,duration);
+    }
+    ,activated: function()
+    {
+      _.title = "";
+      _.titleSub = "";
+      _.$.btnDrawer.hidden = false;
+      _.$.btnBack.hidden = true;
+      if(_.driveData.requestFileList)
+        _.driveData.requestFileList(this,"",function(self,status,list)
+        {
+          if(status == "ok")
+            self.formlist = list;
+        },"id,name,fileExtension,description,trashed","properties has {key='createdBy' and value='printling'}");
+        // "name contains '" + cfg.dataPrefix + "'");
+    }
+    ,getName: function(item)
+    {
+      return item.name;
+    }
+    ,tapFormList: function(e)
+    {
+      _.currentListEntry = e.model.item;
+      _.driveData.requestData(_.currentListEntry.name,"",this,this.formLoaded);
+    }
+    ,formLoaded: function(self,status,data)
+    {
+      try
+      {
+        eval(data.content);
+        pdfMake.createPdf(form).open();
+      }
+      catch(err)
+      {
+        alert(err);
+      }
+    }
+    ,tapDelete: function(e)
+    {
+      e.stopImmediatePropagation();
+      _.currentListEntry = e.model.item;
+      _.confirm("Formular " + this.getName(_.currentListEntry) + " wirklich löschen?"
+               ,[{action:this.doDelete,title:"Ja"}
+                ,{title:"Nein"}]);
+    }
+    ,doDelete: function()
+    {
+    }
+    ,tapEdit: function(e)
+    {
+      e.stopImmediatePropagation();
+      _.currentListEntry = e.model.item;
+      if(_.currentListEntry.name == "")
+        this.formLoadedEdit(this,"ok",_.currentListEntry);
+      else
+        _.driveData.requestData(_.currentListEntry.name,"",this,this.formLoadedEdit);
+    }
+    ,formLoadedEdit: function(self,status,data)
+    {
+      _.$.pageEditor.orgData = data;
+      _.$.pages.selected = 1;
+    }
+    ,tapAdd: function(e)
+    {
+      e.model = {item:{name:"",description:""}};
+      e.model.item.content = "var form =\r\n{\r\n  content:\r\n  [\r\n  ]\r\n}";
+      this.tapEdit(e);
+    }
+  });
+</script>

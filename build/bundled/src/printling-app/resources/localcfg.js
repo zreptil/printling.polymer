@@ -1,0 +1,1 @@
+var _={},cfg={isAdmin:!0,dataPrefix:"printling.",isDebug:!1};

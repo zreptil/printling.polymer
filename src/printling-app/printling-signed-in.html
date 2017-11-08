@@ -1,0 +1,348 @@
+﻿<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-iconset-svg/iron-iconset-svg.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/image-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="printling-list.html">
+<link rel="import" href="printling-editor.html">
+<dom-module id="printling-signed-in">
+  <template>
+    <iron-iconset-svg name="myicons" size="64">
+      <svg>
+        <defs>
+          <g id="drive">
+            <path d="m 68.269008,39.459309 c -3.778141,6.545218 -7.55627,13.090434 -11.334412,19.635654 -15.112035,0 -30.224068,0 -45.336104,0 3.777796,-6.54522 7.555592,-13.090436 11.333388,-19.635654 15.112375,0 30.224752,0 45.337128,0 z" style="fill:#3777e3" />
+            <path d="m 45.601208,0.18800548 c -7.556442,0 -15.112884,0 -22.669328,0 C 30.488324,13.278442 38.044766,26.368875 45.601208,39.459309 c 7.555935,0 15.111861,0 22.6678,0 C 60.713069,26.368875 53.157143,13.278442 45.601208,0.18800548 z" style="fill:#ffcf63" />
+            <path d="M 34.266289,19.823657 C 30.488152,13.278442 26.710017,6.7332232 22.93188,0.18800548 15.375778,13.278442 7.819675,26.368875 0.26357249,39.459309 4.0418791,46.004527 7.8201857,52.549743 11.598492,59.094963 19.154426,46.004527 26.710357,32.914093 34.266289,19.823657 z" style="fill:#11a861" />
+          </g>
+        </defs>
+      </svg>
+    </iron-iconset-svg>
+    <style is="custom-style">
+    :root
+    {
+    }
+    :host
+    {
+      @apply(--layout-center-center);
+      font-size: 1em;
+      background: var(--color-background);
+      @apply(--layout-fit);
+    }
+    #pnlTools div
+    {
+      display: flex;
+    }
+    #drawer-drawer
+    {
+      @apply(--layout);
+      @apply(--layout-vertical);
+    }
+    #drawer
+    {
+      --paper-drawer-panel-left-drawer-container:
+      {
+        width: 19em!important;
+        z-index: 1000;
+      };
+    }
+    #maincontrols paper-fab
+    {
+      --paper-fab-background: var(--paper-light-blue-500);
+      --paper-fab-keyboard-focus-background: var(--paper-light-blue-500);
+    }
+    #admincontrols a[target="json"] paper-fab
+    {
+      --paper-fab-background: var(--paper-red-500);
+      --paper-fab-keyboard-focus-background: var(--paper-red-500);
+    }
+    #admincontrols a[target="drive"] paper-fab
+    {
+      --paper-fab-background: var(--paper-orange-700);
+      --paper-fab-keyboard-focus-background: var(--paper-orange-700);
+    }
+    #maincontrols
+    {
+      display: flex;
+      flex-direction: column;
+      align-self: center;
+      position: fixed;
+      bottom: 0.5em;
+      left: 0.5em;
+      right: 0.5em;
+      z-index: 90;
+    }
+    #maincontrols div
+    {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    iron-pages
+    {
+      @apply(--layout-fit);
+      flex: 1;
+    }
+    #toast
+    {
+      --paper-toast-background-color: var(--paper-red-900);
+      --paper-toast-color: var(--paper-yellow-500);
+    }
+    paper-button
+    {
+      text-transform: none;
+    }
+    #dlgConfirm div:first-child
+    {
+      font-size:0.75em;
+    }
+    #dlgConfirm div:nth-child(2)
+    {
+      font-size:1em;
+    }
+    #dlgConfirm div:nth-child(3)
+    {
+      display:flex;
+      flex-direction:row;
+      justify-content: space-between;
+    }
+    .title
+    {
+      @apply(--layout-horizontal);
+      align-items: center;
+    }
+    .title div:first-child
+    {
+      padding-right: 1em;
+    }
+    .title div:nth-child(2)
+    {
+      @apply(--layout-vertical);
+    }
+    .title div:nth-child(2) div:first-child
+    {
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+    .title div:nth-child(2) div:nth-child(2)
+    {
+      font-size: 0.7em;
+      color: rgba(255,255,255,0.6);
+      padding-top: 0.4em;
+    }
+    </style>
+    <paper-drawer-panel id="drawer" drawer-focus-selector="" force-narrow disable-edge-swipe>
+      <div id="drawer-drawer" drawer>
+        <div id="maincontrols">
+          <div>
+            <div class="horz">
+              <google-signin id="logout" brand="google" width="iconOnly" theme="none"></google-signin>
+              <paper-tooltip for="logout" position="right">Vom Google-Konto abmelden</paper-tooltip>
+              <a href="https://drive.google.com/drive/u/0/my-drive" target="drive">
+                <paper-fab class="whiteFab" mini icon="myicons:drive"></paper-fab>
+              </a>
+              <paper-fab on-tap="tapPermissions" mini icon="social:person"></paper-fab>
+            </div>
+          </div>
+          <div id="admincontrols">
+            <a href="http://jsonviewer.stack.hu/" target="json">
+              <paper-fab mini label="{}"></paper-fab>
+            </a>
+            <a href="https://github.com/bpampuch/pdfmake" target="json">
+              <paper-fab mini icon="image:picture-as-pdf"></paper-fab>
+            </a>
+            <a href="https://console.developers.google.com/apis/library?project=diamant-1195" target="google">
+              <paper-fab mini icon="google"></paper-fab>
+            </a>
+            
+            <a href="https://developers.google.com/drive/v3/web/quickstart/js" target="drive">
+              <paper-fab mini icon="myicons:drive"></paper-fab>
+            </a>
+            <a href="https://developers.google.com/drive/v3/web/quickstart/js" target="drive">
+              <paper-fab mini icon="myicons:drive"></paper-fab>
+            </a>
+            <a href="https://elements.polymer-project.org/" target="polymer">
+              <paper-fab mini icon="polymer"></paper-fab>
+            </a>
+          </div>
+        </div>
+      </div>
+      <paper-header-panel main mode="waterfall">
+        <paper-toolbar>
+          <paper-icon-button id="btnDrawer" icon="menu" paper-drawer-toggle></paper-icon-button>
+          <paper-icon-button id="btnBack" hidden icon="arrow-back" on-tap="tapBack"></paper-icon-button>
+          <div class="title">
+            <div>Printling</div>
+            <div>
+              <div>{{title}}</div>
+              <div>{{titleSub}}</div>
+            </div>
+          </div>
+          <div id="error"></div>
+          <div id="pnlTools">
+            <div></div>
+            <div hidden>
+              <paper-icon-button id="tool1Help" on-tap="tapTool" toggles icon="help"></paper-icon-button>
+              <paper-icon-button id="tool1EditMeta" on-tap="tapTool" toggles icon="create"></paper-icon-button>
+              <paper-icon-button id="tool1Refresh" on-tap="tapTool" toggles icon="autorenew"></paper-icon-button>
+              <paper-icon-button id="tool1Save" on-tap="tapTool" toggles icon="save"></paper-icon-button>
+            </div>
+          </div>
+        </paper-toolbar>
+        <div id="content">
+          <iron-pages id="pages" selected="0" class="layout flex scroll" on-iron-select="pageChanged">
+            <printling-list id="pageList"></printling-list>
+            <printling-editor id="pageEditor"></printling-editor>
+          </iron-pages>
+          <paper-dialog id="dlgConfirm" modal entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <div>Bitte bestätigen</div>
+            <div id="confirmMsg"></div>
+            <div class="horz">
+              <template is="dom-repeat" items="{{confirmButtons}}">
+                <paper-button on-tap="tapConfirmButton">{{item.title}}</paper-button>
+              </template>
+            </div>
+          </paper-dialog>
+        </div>
+      </paper-header-panel>
+    </paper-drawer-panel>
+    <paper-toast id="toast" on-tap="hideToast" type="" duration="0"></paper-toast>
+    <iron-media-query query="(max-width:50em)" query-matches="{{isSmall}}"></iron-media-query>
+    <iron-media-query query="(max-width:40em)" query-matches="{{isMicro}}"></iron-media-query>
+  </template>
+</dom-module>
+<script>
+  Polymer(
+  {
+    is: "printling-signed-in"
+    ,properties:
+    {
+       isSmall: {type:Boolean,value:false}
+      ,isMicro: {type:Boolean,value:false}
+      ,driveData: {type:Object,value:{},observer:"driveDataAttached"}
+      ,title: {type:String,value:""}
+      ,titleSub: {type:String,value:""}
+      ,confirmButtons: {type:Array,value:[]}
+      ,currentListEntry: {type:Object,value:{}}
+      ,storage: {type:Object,value:
+                 {
+                   putItem: function(k,v){this.k = v;},
+                   getItem: function(k){return this.k;},
+                   hastem: function(k){return this.k != undefined;},
+                 }
+                }
+      ,theme: {type:Object, value:
+              {
+                "--color-background":"var(--paper-gray-50)"
+               ,"--color-font":"rgba(0,0,0,var(--light-primary-opacity))"
+               ,"--color-gluc":"rgba(0,0,0,var(--light-primary-opacity))"
+               ,"--color-libre":"rgba(0,0,0,var(--light-secondary-opacity))"
+               ,"--color-primary-back":"var(--paper-indigo-500)"
+               ,"--color-primary-font":"rgba(255,255,255,var(--light-primary-opacity))"
+               ,"--color-secondary-back":"var(--paper-indigo-400)"
+               ,"--color-secondary-font":"rgba(255,255,255,var(--light-primary-opacity))"
+               ,"--color-accent-back":"var(--paper-red-500)"
+               ,"--color-accent-font":"rgba(255,255,255,var(--light-primary-opacity))"
+               ,"--color-button-back":"var(--paper-indigo-400)"
+               ,"--color-button-font":"rgba(255,255,255,var(--light-primary-opacity))"
+               ,"--color-basal-back":"var(--paper-cyan-700)"
+               ,"--color-basal-font":"#fff"
+               ,"--color-fab-second-back":"var(--paper-green-500)"
+               ,"--color-fab-second-fron":"var(--paper-green-100)"
+              }
+             }
+    }
+    ,ready: function()
+    {
+      _ = this;
+      if(typeof(localStorage) != "undefined")
+        this.storage = localStorage;
+      setTimeout(function(){this.switchTheme(this.theme)}.bind(this),50);
+    }
+    ,switchTheme: function(theme)
+    {
+      this.customStyle = {};
+      var list = Object.keys(this.theme);
+      for(var i=0; i<list.length; i++)
+        this.customStyle[list[i]] = theme[list[i]]?theme[list[i]]:this.theme[list[i]];
+      this.updateStyles();
+    }
+    ,confirm: function(msg,action)
+    {
+      if(action && action.constructor === Array)
+        this.confirmButtons = action
+      else
+        this.confirmButtons = [{title:"Nein"},{title:"Ja",action:action}];
+      this.$.confirmMsg.innerHTML = msg;
+      this.$.dlgConfirm.toggle();
+    }
+    ,tapConfirmButton: function(e)
+    {
+      this.$.dlgConfirm.close();
+      var action = this.confirmButtons[e.model.index].action;
+      if(action)
+        action();
+    }
+    ,driveDataAttached: function()
+    {
+      this.driveData.isDebug = cfg.isDebug;
+    }
+    ,signinDone: function(driveData)
+    {
+      this.hidden = false;
+      this.driveData = driveData;
+      this.driveData.showControl = this;
+      this.$.admincontrols.hidden = !cfg.isAdmin;
+      this.pageChanged();
+    }
+    ,signoutDone: function(driveData)
+    {
+    }
+    ,msg: function(text,duration)
+    {
+      if(duration == undefined)
+        duration = 0;
+      this.$.toast.text = text;
+      this.$.toast.duration = duration;
+      this.$.toast.open();
+    }
+    ,tapBack: function(e)
+    {
+      this.$.pages.selectedItem.execTool("Back");
+    }
+    ,tapTool: function(e)
+    {
+      var id = e.currentTarget.id.substr(5);
+      this.$.pages.selectedItem.execTool(id);
+    }
+    ,hideToast: function()
+    {
+      this.$.toast.toggle();
+    }
+    ,pageChanged: function()
+    {
+      if(!this.$.pages.selectedItem)
+        return;
+      this.$.toast.close();
+      var list = document.querySelectorAll("#pnlTools>div");
+      for(var i=0; i<list.length; i++)
+        list[i].hidden = true;
+      var idx = Number(this.$.pages.selected);
+      document.querySelector("#pnlTools>div:nth-of-type(" + (idx+1) + ")").hidden = false;
+      this.$.pages.selectedItem.activated();
+    }
+  });
+</script>

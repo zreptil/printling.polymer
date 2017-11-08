@@ -1,0 +1,7 @@
+﻿{
+  "name": "Printling",
+  "short_name": "printling",
+  "description": "an app to create pdfs with pdfmaker.",
+  "start_url": "/",
+  "display": "standalone"
+}

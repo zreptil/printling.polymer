@@ -1,0 +1,219 @@
+﻿<link rel="import" href="../../bower_components/neon-animation/neon-animation.html">
+<script src="../../bower_components/pdfmake/build/pdfmake.min.js"></script>
+<script src="../../bower_components/pdfmake/build/vfs_fonts.js"></script>
+<script src="resources/ace.js"></script>
+<dom-module id="printling-editor">
+  <template>
+    <style is="custom-style">
+    #playground
+    {
+      @apply(--layout-horizontal);
+      flex: 1;
+      @apply(--layout-self-stretch);
+      height: 100%;
+    }
+    #editor
+    {
+      @apply(--layout-vertical);
+      flex: 1;
+    }
+    #pnlPdf
+    {
+      @apply(--layout-vertical);
+      flex: 1;
+    }
+    paper-dialog
+    {
+      width: 50%;
+    }
+    paper-dialog>div:first-child
+    {
+      font-size: 2em;
+      font-weight: bold;
+    }
+    @media (max-width:1000px)
+    {
+      #playground
+      {
+        @apply(--layout-vertical);
+      }
+    }
+    </style>
+    <div id="playground">
+      <div id="editor"></div>
+      <iframe id="pnlPdf"></iframe>
+    </div>
+    <paper-dialog id="dlgEdit" modal entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+      <div>{{dlgTitle}}</div>
+      <div>
+        <paper-input autofocus label="Name" value="{{editName}}"></paper-input>
+        <paper-input label="Beschreibung" value="{{editDescription}}"></paper-input>
+      </div>
+      <div class="horz">
+        <paper-icon-button icon="close" on-tap="tapDlgEditClose"></paper-icon-button>
+        <paper-icon-button icon="save" on-tap="tapDlgEditSave"></paper-icon-button>
+      </div>
+    </paper-dialog>
+  </template>
+</dom-module>
+<script>
+  Polymer(
+  {
+    is: "printling-editor"
+    ,properties:
+    {
+      orgData: {type:Object,value:{content:""}}
+     ,dlgTitle: {type:String,value:""}
+     ,appTitle: {type:String,value:""}
+     ,appTitleSub: {type:String,value:""}
+    }
+    ,ready: function()
+    {
+    }
+    ,activated: function()
+    {
+      this.appTitle = _.$.pageList.getName(_.currentListEntry);
+      this.appTitleSub = _.currentListEntry.description;
+      this.setTitle();
+      this.editor = ace.edit("editor");
+      this.editor.session.setValue(this.orgData.content);
+      this.setupEditor();
+      this.generate();
+      _.$.btnDrawer.hidden = true;
+      _.$.btnBack.hidden = false;
+      if(this.orgData.name == "")
+        this.execTool("EditMeta");
+    }
+    ,setTitle: function()
+    {
+      _.title = this.appTitle;
+      _.titleSub = this.appTitleSub;
+    }
+    ,isChanged: function()
+    {
+      return this.orgData._fileId == undefined || (this.orgData.content != this.editor.getSession().getValue());
+    }
+		,setupEditor: function()
+    {
+			this.editor.setTheme("ace/theme/monokai");
+			this.editor.getSession().setMode("ace/mode/javascript");
+      this.editor.getSession().setOptions({tabSize:2,useSoftTabs:true});
+    }
+    ,generate: function() 
+    {
+      this.lastGen = new Date();
+      try
+      {
+        eval(this.editor.getSession().getValue());
+        pdfMake.createPdf(form).getDataUrl(function(outDoc) 
+        {
+          this.$.pnlPdf.src = outDoc;
+        }.bind(this));
+      }
+      catch(err)
+      {
+        _.msg(err,0);
+      }
+    }
+    ,execTool: function(id)
+    {
+      _.$.toast.close();
+      switch(id)
+      {
+        case "Save":
+          var data = _.driveData.cloneOf(this.orgData);
+          data.content = this.editor.getSession().getValue();
+          data.metadata = {description:this.appTitleSub,properties:{createdBy:"printling"}};
+          data.name = this.appTitle;
+          delete data._id;
+//          if(this.appTitle.substr(this.appTitle.length - 3) == ".js")
+//            data._id = data._id.substr(0,this.appTitle.length-3);
+          _.driveData.saveData(this,data,"js",this.saveDlgDone);
+          break;
+        case "Back":
+          if(this.isChanged())
+          {
+            _.confirm("Es gibt ungespeicherte Änderungen. Sollen diese verworfen werden?"
+                     ,[{action:this.goBack,title:"Ja"}
+                      ,{title:"Nein"}]);
+          }
+          else
+          {
+            this.goBack();
+          }
+          break;
+        case "Refresh":
+          this.generate();
+          break;
+        case "EditMeta":
+          this.dlgTitle = _.currentListEntry.id==undefined?"Neues Formular":"Formulardaten editieren";
+          this.editName = _.$.pageList.getName(_.currentListEntry);
+          this.editDescription = _.currentListEntry.description;
+          this.$.dlgEdit.toggle();
+          break;
+        case "Help":
+          window.open("https://github.com/bpampuch/pdfmake","PdfMake");
+          break;
+      }
+    }
+    ,goBack: function()
+    {
+      _.$.pages.selected = 0;
+    }
+    ,saveDlgDone: function(self,status,data)
+    {
+      switch(status)
+      {
+        case "ok":
+          self.orgData = data;
+          _.currentListEntry.name = data.name;
+          _.currentListEntry.description = data.description;
+          break;
+        case "modified":
+          _.modifiedOnServer = data._modified;
+          _.confirm("Die Datei wurde auf dem Server inzwischen geändert.<br>"
+                   +"Welche Daten soll ich verwenden?"
+                   ,[{action:self.saveDlgOverwrite.bind(self),title:"Eingegebene Daten"}
+                    ,{action:self.saveDlgDiscard.bind(self),title:"Daten vom Server"}]);
+          break;
+      }
+    }
+    ,saveDlgOverwrite: function()
+    {
+      this.orgData._modified = _.modifiedOnServer;
+      this.execTool("Save");
+//      _.driveData.requestData(this.orgData.name,"",this,this.dlgOverwrite,"Lade Daten ...",true);
+    }
+    ,dlgOverwrite: function(self,status,data)
+    {
+      self.orgData._modified = data._modified;
+      self.execTool("Save");
+    }
+    ,saveDlgDiscard: function()
+    {
+      _.driveData.requestData(this.orgData.name,"",this,this.dlgDiscard,"Lade Daten ...",true);
+    }
+    ,dlgDiscard: function(self,status,data)
+    {
+     self.orgData = data;
+     self.setTitle();
+    }
+    ,tapDlgEditSave: function()
+    {
+      this.appTitle = this.editName;
+      this.appTitleSub = this.editDescription;
+      this.setTitle();
+      this.$.dlgEdit.toggle();
+//      _.driveData.saveMetaData(this,_.currentListEntry,"",this.saveDlgEditDone);
+    }
+    ,saveDlgEditDone: function(self,status,data)
+    {
+      this.orgData = data;
+      _.msg(status);
+    }
+    ,tapDlgEditClose: function()
+    {
+      this.$.dlgEdit.toggle();
+    }
+  });
+</script>
