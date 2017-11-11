@@ -42,13 +42,15 @@ data. It uses the element google-signin for the communication with google webser
       }
     </style>
     <google-signin id="button"
+      allow-drive="{{allowDrive}}"
+      allow-calendar="{{allowCalendar}}"
+      allow-sheets="{{allowSheets}}"
       brand="google"
       client-id="{{googleClientId}}"
       signed-in="{{_signedIn}}"
       label-signout="{{googleUserName}}"
       on-google-signin-success="_handleSignIn"
       on-google-signed-out="_handleSignOut"
-      scopes="[[_scopes]]"
       is-authorized="{{_isAuthorized}}"
       disconnect-on-signout={{disconnectOnSignout}}
       openid-prompt="select_account"
@@ -74,6 +76,18 @@ data. It uses the element google-signin for the communication with google webser
         * True, when the user signed in to Google.
         */
       ,_signedIn: {type: Boolean, value: false}
+      /**
+        * if true, the access to handle files in google drive will be requested when signing in.
+        */
+      ,allowDrive: {type: Boolean, value: true}
+      /**
+        * if true, the access to google calendar will be requested when signing in.
+        */
+      ,allowCalendar: {type: Boolean, value: false}
+      /**
+        * if true, the access to google sheets will be requested when signing in.
+        */
+      ,allowSheets: {type: Boolean, value: false}
       /**
         * The scopes that are needed to do the work. This should not be changed, unless the code
         * changes and more scopes are required.
@@ -141,8 +155,6 @@ data. It uses the element google-signin for the communication with google webser
       this.scCalendar = "https://www.googleapis.com/auth/calendar ";
       this.scSheets = "https://www.googleapis.com/auth/spreadsheets ";
       
-      // up to now every possible scope has to be defined when signing in
-      this._scopes = this.scDrive + this.scCalendar + this.scSheets;
       this.handlingSignOut = false;
       this.dataPool = [];
       this.dataRequests = [];
@@ -226,10 +238,19 @@ data. It uses the element google-signin for the communication with google webser
         this.$.overlay.show(msg);
       if(__cloudData == undefined)
       __cloudData = {self: this};
+      // up to now every possible scope has to be defined when signing in
+      var scopes = "";
+      if(this.allowDrive)
+        scopes += this.scDrive;
+      if(this.allowCalendar)
+        scopes += this.scCalendar;
+      if(this.allowSheets)
+        scopes += this.scSheets;
+      this.$.button.scopes = scopes;
       gapi.auth.authorize(
       {
         "client_id": this.googleClientId,
-        "scope": this._scopes,
+        "scope": scopes,
         "immediate": true,
         "authuser": this._googleAuthUser
       }, function(authResult)
@@ -818,7 +839,7 @@ data. It uses the element google-signin for the communication with google webser
         for(var i=0; i<response.data.length; i++)
         {
           var e = response.data[i];
-          msg += "\n" + i + " - location = " + e[i].location + ", type = " + e[i].locationType;
+          msg += "\n" + i + " - location = " + e.location + ", type = " + e.locationType;
         }
         msg += "\n";
       }

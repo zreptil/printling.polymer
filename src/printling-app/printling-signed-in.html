@@ -164,7 +164,7 @@
             <a href="https://github.com/bpampuch/pdfmake" target="json">
               <paper-fab mini icon="image:picture-as-pdf"></paper-fab>
             </a>
-            <a href="https://console.developers.google.com/apis/library?project=diamant-1195" target="google">
+            <a href="https://console.developers.google.com/apis/library?project=printling-142909" target="google">
               <paper-fab mini icon="google"></paper-fab>
             </a>
             
@@ -310,6 +310,10 @@
     }
     ,signoutDone: function(driveData)
     {
+    }
+    ,tapPermissions: function()
+    {
+      window.open("https://security.google.com/settings/security/permissions","google");
     }
     ,msg: function(text,duration)
     {

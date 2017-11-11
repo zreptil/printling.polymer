@@ -4,7 +4,7 @@
 <link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
 
 <dom-module id="cloud-data-overlay">
-  <style is="custom-style">
+  <style>
     :host
     {
       z-index: 1000;
@@ -21,7 +21,7 @@
     }
   </style>
   <template>
-    <paper-material id="msg" elevation="4">
+    <paper-material elevation="4">
       <div id="cont"></div>
       <paper-button id="btnCancel" on-tap="_cancelClick">Cancel</paper-button>
     </paper-material>
@@ -91,19 +91,11 @@
        */
       _textChanged: function()
       {
-        if(this.text == "")
-        {
-          this.$.msg.hidden = true;
-        }
+        this.$.cont.innerHTML = this.text;
+        if(!this.showCancelButton)
+          this.$.btnCancel.setAttribute("hidden","");
         else
-        {
-          this.$.msg.hidden = false;
-          this.$.cont.innerHTML = this.text;
-          if(!this.showCancelButton)
-            this.$.btnCancel.hidden = true;
-          else
-            this.$.btnCancel.hidden = false;
-        }
+          this.$.btnCancel.removeAttribute("hidden");
       }
     });
   })();

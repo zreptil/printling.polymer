@@ -4,7 +4,7 @@
 <link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
 
 </head><body><dom-module id="cloud-data-overlay">
-  <style is="custom-style">
+  <style>
     :host
     {
       z-index: 1000;
@@ -21,11 +21,11 @@
     }
   </style>
   <template>
-    <paper-material id="msg" elevation="4">
+    <paper-material elevation="4">
       <div id="cont"></div>
       <paper-button id="btnCancel" on-tap="_cancelClick">Cancel</paper-button>
     </paper-material>
   </template>
 </dom-module>
-<script>!function(){Polymer({is:"cloud-data-overlay",properties:{noCancelOnOutsideClick:{type:Boolean,reflectToAttribute:!0,value:!1},hideOverlay:{type:Boolean,value:!1},text:{type:String,value:"",observer:"_textChanged"},showCancelButton:{type:Boolean,value:!1},isCanceled:{type:Boolean,value:!1}},behaviors:[Polymer.IronOverlayBehavior],ready:function(){this.backdropElement.style.zIndex=1e7},show:function(e){this.isCanceled=!1,this.text=e,this.hideOverlay||this.open()},_cancelClick:function(){this.isCanceled=!0,this.fire("on-cancel-click"),this.close()},_textChanged:function(){""==this.text?this.$.msg.hidden=!0:(this.$.msg.hidden=!1,this.$.cont.innerHTML=this.text,this.showCancelButton?this.$.btnCancel.hidden=!1:this.$.btnCancel.hidden=!0)}})}();</script>
+<script>!function(){Polymer({is:"cloud-data-overlay",properties:{noCancelOnOutsideClick:{type:Boolean,reflectToAttribute:!0,value:!1},hideOverlay:{type:Boolean,value:!1},text:{type:String,value:"",observer:"_textChanged"},showCancelButton:{type:Boolean,value:!1},isCanceled:{type:Boolean,value:!1}},behaviors:[Polymer.IronOverlayBehavior],ready:function(){this.backdropElement.style.zIndex=1e7},show:function(e){this.isCanceled=!1,this.text=e,this.hideOverlay||this.open()},_cancelClick:function(){this.isCanceled=!0,this.fire("on-cancel-click"),this.close()},_textChanged:function(){this.$.cont.innerHTML=this.text,this.showCancelButton?this.$.btnCancel.removeAttribute("hidden"):this.$.btnCancel.setAttribute("hidden","")}})}();</script>
 </body></html>
